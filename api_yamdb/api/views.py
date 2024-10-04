@@ -2,8 +2,13 @@ from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
 from django_filters.rest_framework import DjangoFilterBackend
 
-from api.serializers import CategorySerializer, GenreSerializer, TitleSerializer
+from api.serializers import (
+    CategorySerializer,
+    GenreSerializer,
+    TitleSerializer
+)
 from products.models import Category, Genre, Title
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
