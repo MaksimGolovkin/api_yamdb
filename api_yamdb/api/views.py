@@ -52,6 +52,5 @@ class CommentViewSet(viewsets.ModelViewSet):
    # permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
-        """Получение всех комментов к отзыву."""
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
         return review.comments.all()
