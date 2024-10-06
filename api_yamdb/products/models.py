@@ -1,4 +1,8 @@
+from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
+User = get_user_model()
 
 set_on_delete = 'Удалено'
 
@@ -41,3 +45,44 @@ class GenreTitle(models.Model):
 
     def __str__(self):
         return f'{self.genre} {self.title}'
+
+
+class Review(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='reviews')
+    title = models.ForeignKey(
+        Title,
+        on_delete=models.CASCADE,
+        related_name='reviews')
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата добавления отзыва', auto_now_add=True, db_index=True)
+    score = models.IntegerField(
+        'Оценка',
+        default=0,
+        validators=[
+            MaxValueValidator(10),
+            MinValueValidator(1)
+        ],)
+
+    def __str__(self):
+        return self.text
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments')
+    review = models.ForeignKey(
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments')
+    text = models.TextField()
+    pub_date = models.DateTimeField(
+        'Дата добавления комментария', auto_now_add=True, db_index=True)
+
+    def __str__(self):
+        return self.text
