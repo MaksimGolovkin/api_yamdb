@@ -1,31 +1,40 @@
 from rest_framework import serializers
-from datetime import date
 
-from products.models import Category, Genre, Title
-
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['name', 'slug']
+from users.models import User
 
 
-class GenreSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Genre
-        fields = ['name', 'slug']
-
-
-class TitleSerializer(serializers.ModelSerializer):
-    genre = GenreSerializer(many=True)
-    category = CategorySerializer()
+class SignupSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Title
-        fields = '__all__'
+        model = User
+        fields = ['username', 'email']
 
-    def validate_year(self, value):
-        year = date.today().year
-        if value > year:
-            raise serializers.ValidationError('Проверьте год выпуска.')
-        return  value
+    def validate(self, data):
+        if data.get('username') == 'me':
+            raise serializers.ValidationError(
+                "Invalid Username"
+            )
+        return data
+
+
+class TokenSerializer(serializers.ModelSerializer):
+
+    confirmation_code = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ['username', 'confirmation_code']
+
+
+class UserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name',
+                  'last_name', 'bio', 'role']
+
+    def validate_username(self, value):
+        if value == 'me':
+            raise serializers.ValidationError(
+                "Invalid Username")
+        return value
