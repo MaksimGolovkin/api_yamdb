@@ -12,7 +12,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
-from api.permissions import AdminPermissions, UserPermissions
+from api.permissions import AdminPermissions, UserPermissions, AuthorPermissions
 
 from users.models import User
 
@@ -55,7 +55,8 @@ class TitleViewSet(viewsets.ModelViewSet):
 class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
-    # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (AuthorPermissions,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs['title_id'])
@@ -65,7 +66,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
-   # permission_classes = (permissions.IsAuthenticated,)
+    permission_classes = (AuthorPermissions,)
+    pagination_class = LimitOffsetPagination
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs['review_id'])
@@ -75,18 +77,24 @@ class CommentViewSet(viewsets.ModelViewSet):
 class SignupViewSet(
     mixins.CreateModelMixin, viewsets.GenericViewSet
 ):
+    """Представление для регистрации пользователя."""
+
     queryset = User.objects.all()
     serializer_class = SignupSerializer
     permission_classes = (AllowAny,)
 
     def create(self, request):
-        serializer = SignupSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
         username = request.data.get("username")
         email = request.data.get("email")
-        user, user_email = User.objects.get_or_create(
-            username=username, email=email
-        )
+        """Проверка на повторный запрос."""
+        if User.objects.filter(username=username, email=email):
+            user = User.objects.get(username=username, email=email)
+        else:
+            serializer = SignupSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user, user_email = User.objects.get_or_create(
+                username=username, email=email
+            )
         confirmation_code = default_token_generator.make_token(user)
         send_mail(
             subject="Код доступа авторизации",
@@ -101,6 +109,8 @@ class SignupViewSet(
 class TokenViewSet(
     mixins.CreateModelMixin, viewsets.GenericViewSet
 ):
+    """Представление для регистрации токена пользователя."""
+
     queryset = User.objects.all()
     serializer_class = TokenSerializer
     permission_classes = (AllowAny,)
@@ -124,6 +134,7 @@ class TokenViewSet(
 class UsersViewSet(mixins.ListModelMixin,
                    mixins.CreateModelMixin,
                    viewsets.GenericViewSet):
+    """Представление для модели User."""
 
     queryset = User.objects.all()
     serializer_class = UserSerializer

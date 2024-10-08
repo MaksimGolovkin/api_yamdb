@@ -3,6 +3,7 @@ from datetime import date
 
 from products.models import Category, Genre, Title, GenreTitle, Review, Comment
 from users.models import User
+from django.shortcuts import get_object_or_404
 
 
 class CategorySerializer(serializers.ModelSerializer):
