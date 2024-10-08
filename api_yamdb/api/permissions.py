@@ -17,9 +17,10 @@ class ModeratorPermissions(permissions.BasePermission):
 
     def has_permission(self, request, view):
         return bool(
-            (request.method in permissions.SAFE_METHODS or request.user.role == "user") or (
-                request.method == 'DELETE' and request.user.role == "moderator"
-            )
+            (request.method in permissions.SAFE_METHODS
+             or request.user.role == "user")
+            or (request.method == 'DELETE'
+                and request.user.role == "moderator")
         )
 
 

@@ -4,13 +4,15 @@ from users.models import User
 
 
 class SignupSerializer(serializers.ModelSerializer):
+    """Сериализатор для регистрации пользователя."""
 
     class Meta:
         model = User
         fields = ['username', 'email']
 
     def validate(self, data):
-        if data.get('username') == 'me':
+        username = data.get('username')
+        if username == 'me':
             raise serializers.ValidationError(
                 "Invalid Username"
             )
@@ -18,6 +20,7 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для регистрации токена пользователя."""
 
     confirmation_code = serializers.CharField(required=True)
 
@@ -27,6 +30,7 @@ class TokenSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
+    """Сериализатор для модели User."""
 
     class Meta:
         model = User

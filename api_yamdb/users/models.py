@@ -12,6 +12,7 @@ ROLE_CHOICES = (
     (ADMIN, "Администратор"),
 )
 
+"""Проверка на корректность ввода."""
 user_name_validator = RegexValidator(
     regex=r'^[\w.@+-]+$',
     message='Username contains invalid characters'
