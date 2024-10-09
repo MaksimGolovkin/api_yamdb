@@ -83,7 +83,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
     permission_classes = (AuthorPermissions,)
     pagination_class = LimitOffsetPagination
-    lookup_field = 'title_id'
+    lookup_field = 'id'
 
     def get_title(self):
         return get_object_or_404(Title, id=self.kwargs.get("title_id"))
