@@ -67,7 +67,8 @@ class TitleViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, Retrieve
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    filterset_fields = ('category', 'rating', 'genre', 'name', 'year')
+    filterset_fields = ('category', 'rating', 'genres__slug', 'name', 'year')
+    
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
