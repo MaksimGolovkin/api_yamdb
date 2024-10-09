@@ -28,6 +28,8 @@ class AdminPermissions(permissions.BasePermission):
     """Кастомное разрешение на доступ к информации только админам."""
 
     def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
         return bool(request.user.role == "admin" or request.user.is_superuser)
 
 
