@@ -105,11 +105,15 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class SignupSerializer(serializers.ModelSerializer):
-    model = User
-    fields = ['username', 'email']
+    """Сериализатор для регистрации пользователя."""
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']
 
     def validate(self, data):
-        if data.get('username') == 'me':
+        username = data.get('username')
+        if username == 'me':
             raise serializers.ValidationError(
                 "Invalid Username"
             )
@@ -117,15 +121,22 @@ class SignupSerializer(serializers.ModelSerializer):
 
 
 class TokenSerializer(serializers.ModelSerializer):
+    """Сериализатор для регистрации токена пользователя."""
+
     confirmation_code = serializers.CharField(required=True)
-    model = User
-    fields = ['username', 'confirmation_code']
+
+    class Meta:
+        model = User
+        fields = ['username', 'confirmation_code']
 
 
 class UserSerializer(serializers.ModelSerializer):
-    model = User
-    fields = ['username', 'email', 'first_name',
-              'last_name', 'bio', 'role']
+    """Сериализатор для модели User."""
+
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'first_name',
+                  'last_name', 'bio', 'role']
 
     def validate_username(self, value):
         if value == 'me':
