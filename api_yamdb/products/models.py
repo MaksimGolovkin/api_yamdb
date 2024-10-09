@@ -1,8 +1,8 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
 from users.models import User
+
+User = get_user_model()
 
 set_on_delete = 'Удалено'
 
@@ -12,7 +12,7 @@ class Category(models.Model):
     slug = models.SlugField(unique=True, max_length=50)
 
     def __str__(self):
-        return {self.name}
+        return self.name
 
 
 class Genre(models.Model):
@@ -20,13 +20,13 @@ class Genre(models.Model):
     slug = models.SlugField(unique=True, max_length=50)
 
     def __str__(self):
-        return {self.name}
+        return self.name
 
 
 class Title(models.Model):
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    rating = models.IntegerField(default=0, blank=True)
+    rating = models.IntegerField(default=None, blank=True, null=True)
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(Genre, through='GenreTitle')
     category = models.ForeignKey(

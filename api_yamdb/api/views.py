@@ -1,5 +1,7 @@
-from rest_framework import filters, mixins, status, viewsets
+from rest_framework import filters, mixins, status, viewsets, permissions
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.exceptions import MethodNotAllowed
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
 
@@ -30,48 +32,82 @@ from api.serializers import (
 from products.models import Category, Genre, Title, Review, Comment
 
 
-class CategoryViewSet(viewsets.ModelViewSet):
+class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
     pagination_class = LimitOffsetPagination
     lookup_field = 'slug'
+    search_fields = ('name',)
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (AllowAny(),)
+
+        return (AdminPermissions(),)
 
 
-class GenreViewSet(viewsets.ModelViewSet):
+class GenreViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
     pagination_class = LimitOffsetPagination
     lookup_field = 'slug'
+    search_fields = ('name',)
+
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (AllowAny(),)
+
+        return (AdminPermissions(),)
 
 
-class TitleViewSet(viewsets.ModelViewSet):
+class TitleViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin, viewsets.GenericViewSet):
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
     filterset_fields = ('category', 'rating', 'genre', 'name', 'year')
 
+    def get_permissions(self):
+        if self.request.method in permissions.SAFE_METHODS:
+            return (AllowAny(),)
+
+        if self.request.method == 'PUT':
+            raise MethodNotAllowed('Данный метод запрещен.')
+
+        return (AdminPermissions(),)
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
-
     serializer_class = ReviewSerializer
     permission_classes = (AuthorPermissions,)
     pagination_class = LimitOffsetPagination
+    lookup_field = 'id'
+
+    def get_title(self):
+        return get_object_or_404(Title, id=self.kwargs.get("title_id"))
 
     def get_queryset(self):
-        title = get_object_or_404(Title, id=self.kwargs['title_id'])
-        return title.reviews.all()
+        return self.get_title().reviews.select_related("author")
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, title=self.get_title())
 
 
 class CommentViewSet(viewsets.ModelViewSet):
-
     serializer_class = CommentSerializer
     permission_classes = (AuthorPermissions,)
     pagination_class = LimitOffsetPagination
 
+    def get_review(self):
+        return get_object_or_404(Review, id=self.kwargs.get("review_id"))
+
     def get_queryset(self):
-        review = get_object_or_404(Review, id=self.kwargs['review_id'])
-        return review.comments.all()
+        return self.get_review().comments.select_related("author")
+
+    def perform_create(self, serializer):
+        serializer.save(author=self.request.user, review=self.get_review())
 
 
 class SignupViewSet(
