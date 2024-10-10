@@ -64,7 +64,39 @@ _"Admin"_
     {
     "token": "string"
     } 
+- GET-запрос Получить список всех отзывов.
+#### GET ...api/v1/titles/{title_id}/reviews/
+Получение списка всех отзывов
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "id": 0,
+      "text": "string",
+      "author": "string",
+      "score": 1,
+      "pub_date": "2019-08-24T14:15:22Z"
+    }
+  ]
+}
 
+#### GET ...api/v1/titles/{title_id}/reviews/{review_id}/comments/
+Получение списка всех комментариев
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "id": 0,
+      "text": "string",
+      "author": "string",
+      "pub_date": "2019-08-24T14:15:22Z"
+    }
+  ]
+}
 ...
 
 ## Для локального развертывания проекта у себя, необходимо:
