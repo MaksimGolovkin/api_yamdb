@@ -13,6 +13,7 @@ from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 from api.permissions import AdminPermissions, UserPermissions, AuthorPermissions
 
@@ -29,8 +30,9 @@ from api.serializers import (
     TokenSerializer,
     UserSerializer
 )
-from products.models import Category, Genre, Title, Review, Comment
+from reviews.models import Category, Genre, Title, Review, Comment
 
+NO_PUT_METHODS = ('get', 'post', 'patch', 'delete', 'head', 'options', 'trace')
 
 class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
     queryset = Category.objects.all()
@@ -78,37 +80,89 @@ class TitleViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, Retrieve
 
         return (AdminPermissions(),)
 
-
 class ReviewViewSet(viewsets.ModelViewSet):
+    """Отображение действий с отзывами."""
+
     serializer_class = ReviewSerializer
-    permission_classes = (AuthorPermissions,)
+    permission_classes = (IsAuthenticatedOrReadOnly, AuthorPermissions,)
+    http_method_names = NO_PUT_METHODS
     pagination_class = LimitOffsetPagination
-    lookup_field = 'id'
 
     def get_title(self):
-        return get_object_or_404(Title, id=self.kwargs.get("title_id"))
+        return get_object_or_404(Title, pk=self.kwargs['title_id'])
 
     def get_queryset(self):
-        return self.get_title().reviews.select_related("author")
+        return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        serializer.save(author=self.request.user, title=self.get_title())
-
-
+        serializer.save(author=self.request.user,
+                        title=self.get_title())
+        
 class CommentViewSet(viewsets.ModelViewSet):
+    """Отображение действий с комментариями."""
+
     serializer_class = CommentSerializer
-    permission_classes = (AuthorPermissions,)
+    permission_classes = (IsAuthenticatedOrReadOnly, AuthorPermissions,)
+    http_method_names = NO_PUT_METHODS
     pagination_class = LimitOffsetPagination
 
     def get_review(self):
-        return get_object_or_404(Review, id=self.kwargs.get("review_id"))
+        return get_object_or_404(Review,
+                                 title=self.kwargs['title_id'],
+                                 pk=self.kwargs['review_id'])
 
     def get_queryset(self):
-        return self.get_review().comments.select_related("author")
+        return self.get_review().comments.all()
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user, review=self.get_review())
 
+# class ReviewViewSet(viewsets.ModelViewSet):
+#     """Вьюсет для обьектов модели Review."""
+
+#     serializer_class = ReviewSerializer
+#     permission_classes = (IsAuthenticatedOrReadOnly, AuthorPermissions,)
+
+#     def get_title(self):
+#         """Возвращает объект текущего произведения."""
+#         title_id = self.kwargs.get('title_id')
+#         return get_object_or_404(Title, pk=title_id)
+
+#     def get_queryset(self):
+#         """Возвращает queryset c отзывами для текущего произведения."""
+#         return self.get_title().reviews.all()
+
+#     def perform_create(self, serializer):
+#         """Создает отзыв для текущего произведения,
+#         где автором является текущий пользователь."""
+#         serializer.save(
+#             author=self.request.user,
+#             title=self.get_title()
+#         )
+
+
+# class CommentViewSet(viewsets.ModelViewSet):
+#     """Вьюсет для обьектов модели Comment."""
+
+#     serializer_class = CommentSerializer
+#     permission_classes = (IsAuthenticatedOrReadOnly, AuthorPermissions,)
+
+#     def get_review(self):
+#         """Возвращает объект текущего отзыва."""
+#         review_id = self.kwargs.get('review_id')
+#         return get_object_or_404(Review, pk=review_id)
+
+#     def get_queryset(self):
+#         """Возвращает queryset c комментариями для текущего отзыва."""
+#         return self.get_review().comments.all()
+
+#     def perform_create(self, serializer):
+#         """Создает комментарий для текущего отзыва,
+#         где автором является текущий пользователь."""
+#         serializer.save(
+#             author=self.request.user,
+#             review=self.get_review()
+#         )
 
 class SignupViewSet(
     mixins.CreateModelMixin, viewsets.GenericViewSet
