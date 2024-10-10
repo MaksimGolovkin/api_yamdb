@@ -64,9 +64,11 @@ _"Admin"_
 Получение списка всех отзывов:
 
     {
-    "username": "user",
-    "confirmation_code": "confirmation_code"
-    }  
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [ ]
+   }  
     
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
