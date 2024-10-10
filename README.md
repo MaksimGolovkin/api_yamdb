@@ -65,6 +65,20 @@ _"Admin"_
     "token": "string"
     } 
 
+- POST-запрос на получение токена по "Username" и коду подтверждения с почты.
+#### POST .../api/v1/posts/14/comments/
+Тело запроса:
+
+    {
+    "username": "user",
+    "confirmation_code": "confirmation_code"
+    } 
+Пример ответа:
+
+    {
+    "token": "string"
+    } 
+    
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
 Получение списка всех отзывов:
