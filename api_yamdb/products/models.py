@@ -1,8 +1,7 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from users.models import User
 
-User = get_user_model()
 
 set_on_delete = 'Удалено'
 
@@ -11,16 +10,26 @@ class Category(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
+<<<<<<< HEAD
     # def __str__(self):
     #     return self.name
+=======
+    def __str__(self):
+        return self.name
+>>>>>>> 14bc7076023fd9dbbb0dd71d2bff313029c13e3a
 
 
 class Genre(models.Model):
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
+<<<<<<< HEAD
     # def __str__(self):
     #     return self.name
+=======
+    def __str__(self):
+        return self.name
+>>>>>>> 14bc7076023fd9dbbb0dd71d2bff313029c13e3a
 
 
 class Title(models.Model):
