@@ -62,14 +62,15 @@ _"Admin"_
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
 Получение списка всех отзывов:
-
+```
     {
   "count": 0,
   "next": "string",
   "previous": "string",
   "results": [ ]
    }  
-    
+ ```
+   
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
 Получение списка всех отзывов:
