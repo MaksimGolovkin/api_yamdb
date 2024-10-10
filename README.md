@@ -37,13 +37,7 @@ _"Admin"_
 
 ### Примеры запросов:
 - POST-запрос на регистрацию пользователя:
-#### POST ...api/v1/auth/signup/
-Тело запроса:
-
-    {
-    "email": "user@example.com",
-    "username": "user"
-    } 
+#### POST ...api/v1/auth/signup/ 
 Пример ответа:
 
     {
