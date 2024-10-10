@@ -61,20 +61,12 @@ _"Admin"_
 
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
-Тело запроса:
+Получение списка всех отзывов:
 
     {
     "username": "user",
     "confirmation_code": "confirmation_code"
-    } 
-Пример ответа:
-
-    {
-  "count": 0,
-  "next": "string",
-  "previous": "string",
-  "results": [ ]
-   } 
+    }  
     
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
