@@ -1,7 +1,7 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from users.models import User
 
+from users.models import User
 
 set_on_delete = 'Удалено'
 
@@ -47,6 +47,7 @@ class GenreTitle(models.Model):
 
 
 class Review(models.Model):
+    """Класс для работы с отзывами."""
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -59,9 +60,11 @@ class Review(models.Model):
         related_name="reviews",
         verbose_name="Автор",
     )
-    score = models.SmallIntegerField(
-        verbose_name="Оценка",
-        validators=[MinValueValidator(1), MaxValueValidator(10)],
+    score = models.PositiveSmallIntegerField(
+        'Оценка',
+        validators=[MinValueValidator(1, message='Минимальное значение 1'),
+                    MaxValueValidator(10, message='Максимальное значение 10')
+                    ]
     )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
@@ -73,16 +76,8 @@ class Review(models.Model):
             )
         ]
 
-    def __str__(self):
-        return self.text[:15]
-
-    def save(self, *args, **kwargs):
-        if self.score < 1 or self.score > 10:
-            raise ValueError("Оценка должна быть от 1 до 10")
-        super().save(*args, **kwargs)
-
-
 class Comment(models.Model):
+    """Класс для работы с комметариями."""
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name="comments"
     )

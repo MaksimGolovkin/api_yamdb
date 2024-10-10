@@ -1,9 +1,8 @@
-from rest_framework import serializers
 from datetime import date
 
-from reviews.models import Category, Genre, Title, GenreTitle, Review, Comment
+from rest_framework import serializers
+from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 from users.models import User
-from django.shortcuts import get_object_or_404
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -28,10 +27,9 @@ class TitleSerializer(serializers.ModelSerializer):
         slug_field='slug',
         queryset=Category.objects.all()
     )
-
     class Meta:
         model = Title
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
+        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category',)
 
     def validate_year(self, value):
         year = date.today().year
@@ -58,21 +56,16 @@ class TitleSerializer(serializers.ModelSerializer):
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """Работа с отзывами."""
-
+    """Сериализатор для работы с отзывами."""
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
-
+    
     class Meta:
         fields = ('id', 'text', 'author', 'score', 'pub_date')
         model = Review
 
     def validate(self, value):
         if self.context['request'].method in ['POST']:
-            # Проверяем, что произведение существует
-            if not Title.objects.filter(id=self.context['view'].kwargs['title_id']).exists():
-                raise serializers.ValidationError('Произведение не существует')
-
             if Review.objects.filter(
                     author=self.context.get('request').user,
                     title=self.context['view'].kwargs['title_id']
@@ -82,8 +75,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Работа с комментариями."""
-
+    """Сериализатор для работы с комментариями."""
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
 
