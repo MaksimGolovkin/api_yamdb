@@ -65,8 +65,8 @@ _"Admin"_
     "token": "string"
     } 
 
-- POST-запрос на получение токена по "Username" и коду подтверждения с почты.
-#### POST .../api/v1/posts/14/comments/
+- GET-запрос Получить список всех отзывов.
+#### GET ...api/v1/titles/{title_id}/reviews/
 Тело запроса:
 
     {
@@ -76,8 +76,11 @@ _"Admin"_
 Пример ответа:
 
     {
-    "token": "string"
-    } 
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [ ]
+   } 
     
 - GET-запрос Получить список всех отзывов.
 #### GET ...api/v1/titles/{title_id}/reviews/
