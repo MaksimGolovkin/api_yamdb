@@ -69,6 +69,10 @@ class ReviewSerializer(serializers.ModelSerializer):
 
     def validate(self, value):
         if self.context['request'].method in ['POST']:
+            # Проверяем, что произведение существует
+            if not Title.objects.filter(id=self.context['view'].kwargs['title_id']).exists():
+                raise serializers.ValidationError('Произведение не существует')
+
             if Review.objects.filter(
                     author=self.context.get('request').user,
                     title=self.context['view'].kwargs['title_id']
