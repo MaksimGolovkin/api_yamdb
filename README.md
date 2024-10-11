@@ -30,6 +30,7 @@ _"User"_
 - api/v1/titles/{title_id}/reviews/{review_id}/ - Редактирование/удаление/ получение по id отзывов;
 - api/v1/titles/{title_id}/reviews/{review_id}/comments/ - Просмотр/добавление комментариев;
 - api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/ - Редактирование/удаление/ получение по id комментариев;
+  
 _"Moderator"_
 
 - api/v1/users/me/ - Получение данных своей учетной записи/Изменение данных своей учетной записи;
