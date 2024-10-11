@@ -57,7 +57,30 @@ _"Admin"_
     {
     "email": "user@example.com",
     "username": "user"
-    } 
+    }
+
+- POST-запрос на добавления жанра или произведения:
+### POST ...api/v1/categories(genres)/ | ...api/v1/genres/
+Тело запроса:
+
+    {
+    "name": "string",
+    "slug": "^-$"
+    }
+
+- POST-запрос на добавления произведения:
+### POST ...api/v1/titles/
+Тело запроса:
+
+    {
+    "name": "string",
+    "year": 0,
+    "description": "string",
+    "genre": [
+    "string"
+    ],
+    "category": "string"
+    }
 
 - POST-запрос на получение токена по "Username" и коду подтверждения с почты.
 #### POST .../api/v1/posts/14/comments/
