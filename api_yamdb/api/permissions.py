@@ -43,8 +43,13 @@ class AuthorPermissions(permissions.BasePermission):
             return obj.author == request.user
         return False
 
-class IsAuthorModeratorAdminOrReadOnlyPermission(permissions.BasePermission):
-    """Кастомное разрешение на доступ к информации автору, модератору, админу."""
+
+class IsAuthorModeratorAdminOrReadOnlyPermission(
+    permissions.BasePermission
+):
+    """
+    Кастомное разрешение на доступ к информации автору, модератору, админу.
+    """
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS
