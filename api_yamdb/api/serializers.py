@@ -18,7 +18,7 @@ class GenreSerializer(serializers.ModelSerializer):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    genres = serializers.SlugRelatedField(
+    genre = serializers.SlugRelatedField(
         slug_field='slug',
         queryset=Genre.objects.all(),
         many=True
@@ -29,15 +29,8 @@ class TitleSerializer(serializers.ModelSerializer):
     )
     class Meta:
         model = Title
-<<<<<<< HEAD
-<<<<<<< HEAD
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genres', 'category')
-=======
-        fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category')
->>>>>>> 14bc7076023fd9dbbb0dd71d2bff313029c13e3a
-=======
         fields = ('id', 'name', 'year', 'rating', 'description', 'genre', 'category',)
->>>>>>> refs/remotes/origin/develop
+
 
     def validate_year(self, value):
         year = date.today().year
@@ -46,20 +39,22 @@ class TitleSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
-        genres_data = validated_data.pop('genres')
+        genres_data = validated_data.pop('genre')
         category_data = validated_data.pop('category')
-        validated_data['category_id'] = category_data.id
-        title = Title.objects.create(**validated_data)
+
+        title = Title.objects.create(category=category_data, **validated_data)
+
         for genre in genres_data:
-            pup, status = Genre.objects.get_or_create(id=genre.id, name=genre.name, slug=genre.slug)
-            GenreTitle.objects.create(
-                genre=pup, title=title
+            current_genre, status = Genre.objects.get_or_create(
+                slug=genre.slug, name=genre.name
             )
+            GenreTitle.objects.create(genre=current_genre, title=title)
+
         return title
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['genres'] = GenreSerializer(instance.genres.all(), many=True).data
+        ret['genre'] = GenreSerializer(instance.genre.all(), many=True).data
         ret['category'] = CategorySerializer(instance.category).data
         return ret
 
@@ -132,24 +127,3 @@ class UserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Invalid Username")
         return value
-
-
-
-# try:
-        #     if 'genres' not in self.initial_data:
-        #         title = Title.objects.create(**validated_data)
-        #         print(f'1{title}')
-        #         return title
-        #     genres = validated_data.pop('title')
-        #     title = Title.objects.create(**validated_data)
-        #     for genre in genres:
-        #         current_genre, status = Genre.objects.get_or_create(
-        #             **genre
-        #         )
-        #         GenreTitle.objects.get_or_create(
-        #             genre=current_genre, title=title
-        #         )
-        #     print(f'2{title}')
-        #     return title
-        # except:
-        #     print('Данилу спасибо')
