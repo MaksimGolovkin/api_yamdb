@@ -18,38 +18,69 @@
 ### Доступные роуты для взаимодействия у _НЕ аутентифицированных_ пользователей (безопасные запросы CRUD):
 - api/v1/auth/signup/ - Регистрация пользователя;
 - api/v1/auth/token/ - Получение токена по "Username" и коду подтверждения с почты;
+- api/v1/titles/{title_id}/reviews/ - Просмотр отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/ - Просмотр комментариев;
 ...
 
 ### Дополнительные роуты для взаимодействия у _аутентифицированных_ пользователей с учетом их ролей:
 _"User"_
 
 - api/v1/users/me/ - Получение данных своей учетной записи/Изменение данных своей учетной записи;
-
+- api/v1/titles/{title_id}/reviews/ - Просмотр/добавление отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/ - Редактирование/удаление/ получение по id отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/ - Просмотр/добавление комментариев;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/ - Редактирование/удаление/ получение по id комментариев;
+  
 _"Moderator"_
 
-- 
+- api/v1/users/me/ - Получение данных своей учетной записи/Изменение данных своей учетной записи;
+- api/v1/titles/{title_id}/reviews/ - Просмотр/добавление отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/ - Редактирование/удаление/ получение по id отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/ - Просмотр/добавление комментариев;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/ - Редактирование/удаление/ получение по id комментариев;
 
 _"Admin"_
 
 - api/v1/users/ - Получение списка всех пользователей/Добавление пользователя;
 - api/v1/users/{username}/ - Получение пользователя/Внесение изменений пользователя/Удаление пользователя;
-
+- api/v1/users/me/ - Получение данных своей учетной записи/Изменение данных своей учетной записи;
+- api/v1/titles/{title_id}/reviews/ - Просмотр/добавление отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/ - Редактирование/удаление/ получение по id отзывов;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/ - Просмотр/добавление комментариев;
+- api/v1/titles/{title_id}/reviews/{review_id}/comments/{comment_id}/ - Редактирование/удаление/ получение по id комментариев;
 
 ### Примеры запросов:
 - POST-запрос на регистрацию пользователя:
-#### POST ...api/v1/auth/signup/
-Тело запроса:
-
-    {
-    "email": "user@example.com",
-    "username": "user"
-    } 
+#### POST ...api/v1/auth/signup/ 
 Пример ответа:
 
     {
     "email": "user@example.com",
     "username": "user"
-    } 
+    }
+
+- POST-запрос на добавления жанра или произведения:
+### POST ...api/v1/categories(genres)/ | ...api/v1/genres/
+Тело запроса:
+
+    {
+    "name": "string",
+    "slug": "^-$"
+    }
+
+- POST-запрос на добавления произведения:
+### POST ...api/v1/titles/
+Тело запроса:
+
+    {
+    "name": "string",
+    "year": 0,
+    "description": "string",
+    "genre": [
+    "string"
+    ],
+    "category": "string"
+    }
 
 - POST-запрос на получение токена по "Username" и коду подтверждения с почты.
 #### POST .../api/v1/posts/14/comments/
@@ -65,6 +96,28 @@ _"Admin"_
     "token": "string"
     } 
 
+- GET-запрос Получить список всех отзывов.
+#### GET ...api/v1/titles/{title_id}/reviews/
+Получение списка всех отзывов:
+```
+  {
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [...]
+   }  
+ ```
+
+#### GET ...api/v1/titles/{title_id}/reviews/{review_id}/comments/
+Получение списка всех комментариев:
+```
+  {
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [...]
+  }
+```
 ...
 
 ## Для локального развертывания проекта у себя, необходимо:
