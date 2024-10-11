@@ -158,7 +158,6 @@ class Test04TitleAPI:
             f'{self.TITLES_URL}?genre={genres[1]["slug"]}'
         )
         data = response.json()
-        # print(data)
         assert len(data['results']) == 2, (
             f'Проверьте, что для эндпоинта `{self.TITLES_URL}` реализована '
             'возможность фильтрации по полю `genre` с использованием '

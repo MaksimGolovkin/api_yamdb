@@ -1,5 +1,6 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 
 from api.permissions import (AdminPermissions,
@@ -14,8 +15,7 @@ from rest_framework import filters, mixins, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin, RetrieveModelMixin,
-                                   UpdateModelMixin)
+                                   ListModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -25,7 +25,12 @@ from users.models import User
 
 NO_PUT_METHODS = ('get', 'post', 'patch', 'delete', 'head', 'options', 'trace')
 
-class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+
+class CategoryViewSet(CreateModelMixin,
+                      ListModelMixin,
+                      DestroyModelMixin,
+                      viewsets.GenericViewSet):
+    """Представление для категорий."""
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
     filter_backends = (filters.SearchFilter,)
@@ -40,7 +45,11 @@ class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, views
         return (AdminPermissions(),)
 
 
-class GenreViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets.GenericViewSet):
+class GenreViewSet(CreateModelMixin,
+                   ListModelMixin,
+                   DestroyModelMixin,
+                   viewsets.GenericViewSet):
+    """Представление для жанров."""
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     filter_backends = (filters.SearchFilter,)
@@ -55,13 +64,29 @@ class GenreViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, viewsets
         return (AdminPermissions(),)
 
 
-class TitleViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, RetrieveModelMixin, UpdateModelMixin, viewsets.GenericViewSet):
+class TitleViewSet(viewsets.ModelViewSet):
+    """Представление для произведений."""
+
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    filterset_fields = ('category', 'rating', 'genretitles__genre__slug', 'name', 'year')
-    
+    filterset_fields = (
+        'category__slug',
+        'rating',
+        'genre__slug',
+        'name',
+        'year'
+    )
+
+    def get_queryset(self):
+        genre_slug = self.request.query_params.get('genre')
+        category_slug = self.request.query_params.get('category')
+        if genre_slug:
+            return Title.objects.filter(genre__slug=genre_slug)
+        if category_slug:
+            return Title.objects.filter(category__slug=category_slug)
+        return super().get_queryset()
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
@@ -80,6 +105,7 @@ class TitleViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, Retrieve
             raise MethodNotAllowed('Данный метод запрещен.')
 
         return (AdminPermissions(),)
+
 
 class SignupViewSet(
     mixins.CreateModelMixin, viewsets.GenericViewSet
@@ -134,7 +160,8 @@ class TokenViewSet(
         ):
             return Response(status=status.HTTP_400_BAD_REQUEST)
         return Response(
-            {"Token": str(AccessToken.for_user(user))}, status=status.HTTP_200_OK
+            {"Token": str(AccessToken.for_user(user))},
+            status=status.HTTP_200_OK
         )
 
 
@@ -185,7 +212,7 @@ class UsersViewSet(mixins.ListModelMixin,
             return Response(result.data)
         result = self.get_serializer(request.user)
         return Response(result.data)
-    
+
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Представление отзывов"""
@@ -205,12 +232,24 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        """Создает отзыв для текузего произведения."""
+        """Создает отзыв для текущего произведения и обновляет рейтинг."""
+        title = self.get_title()
         serializer.save(
             author=self.request.user,
-            title=self.get_title()
+            title=title
         )
-        
+        self.update_title_rating(title)
+
+    def update_title_rating(self, title):
+        """Обновляет рейтинг произведения на основе отзывов."""
+        avg_rating = title.reviews.aggregate(Avg('score'))['score__avg']
+        if avg_rating is not None:
+            title.rating = round(avg_rating)
+        else:
+            title.rating = None
+        title.save()
+
+
 class CommentViewSet(viewsets.ModelViewSet):
     """Предстваление комментариев."""
 

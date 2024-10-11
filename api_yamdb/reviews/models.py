@@ -7,6 +7,7 @@ set_on_delete = 'Удалено'
 
 
 class Category(models.Model):
+    """Модель категории."""
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
@@ -15,6 +16,7 @@ class Category(models.Model):
 
 
 class Genre(models.Model):
+    """Модель жанра."""
     name = models.CharField(max_length=256)
     slug = models.SlugField(unique=True, max_length=50)
 
@@ -23,11 +25,20 @@ class Genre(models.Model):
 
 
 class Title(models.Model):
+    """Модель произведения."""
     name = models.CharField(max_length=256)
     year = models.IntegerField()
-    rating = models.IntegerField(default=None, blank=True, null=True)
+    rating = models.IntegerField(
+        default=None,
+        blank=True,
+        null=True,
+        validators=[MinValueValidator(1),
+                    MaxValueValidator(10)]
+    )
     description = models.CharField(max_length=256, blank=True, null=True)
-    genre = models.ManyToManyField(Genre, through='GenreTitle', related_name='titles')
+    genre = models.ManyToManyField(Genre,
+                                   through='GenreTitle',
+                                   related_name='titles')
     category = models.ForeignKey(
         Category,
         on_delete=models.SET(set_on_delete),
@@ -35,12 +46,17 @@ class Title(models.Model):
     )
 
     def __str__(self):
-        return f'{self.name} {self.genre} {self.category}'
+        return self.name
 
 
 class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE, related_name='genretitles')
-    title = models.ForeignKey(Title, on_delete=models.CASCADE, related_name='genretitles')
+    """Промежуточная модель для связи жанров с произведениями."""
+    genre = models.ForeignKey(Genre,
+                              on_delete=models.CASCADE,
+                              related_name='genretitles')
+    title = models.ForeignKey(Title,
+                              on_delete=models.CASCADE,
+                              related_name='genretitles')
 
     def __str__(self):
         return f'{self.genre} {self.title}'
@@ -75,6 +91,7 @@ class Review(models.Model):
                 fields=["author", "title"], name="unique_review"
             )
         ]
+
 
 class Comment(models.Model):
     """Класс для работы с комметариями."""
