@@ -1,6 +1,7 @@
 from datetime import date
 
 from rest_framework import serializers
+
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 from users.models import User
 
@@ -53,20 +54,6 @@ class TitleSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('Проверьте год выпуска.')
         return value
 
-    def create(self, validated_data):
-        genres_data = validated_data.pop('genre')
-        category_data = validated_data.pop('category')
-
-        title = Title.objects.create(category=category_data, **validated_data)
-
-        for genre in genres_data:
-            current_genre, status = Genre.objects.get_or_create(
-                slug=genre.slug, name=genre.name
-            )
-            GenreTitle.objects.create(genre=current_genre, title=title)
-
-        return title
-
     def to_representation(self, instance):
         ret = super().to_representation(instance)
         ret['genre'] = GenreSerializer(instance.genre.all(), many=True).data
@@ -76,6 +63,7 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с отзывами."""
+
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
 
@@ -95,6 +83,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с комментариями."""
+
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
 
