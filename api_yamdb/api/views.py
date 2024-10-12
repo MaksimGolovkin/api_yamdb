@@ -17,7 +17,7 @@ from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
                                    ListModelMixin)
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated,IsAuthenticatedOrReadOnly
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 from reviews.models import Category, Genre, Review, Title
@@ -264,9 +264,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                                  pk=self.kwargs['review_id'])
 
     def get_queryset(self):
-        """Отображение всех комментариев по отзыву."""
+        #Отображение всех комментариев по отзыву.
+
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        """Создает комментарий для текузего отзыва."""
+        #Создает комментарий для текузего отзыва.
+        
         serializer.save(author=self.request.user, review=self.get_review())

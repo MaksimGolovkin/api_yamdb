@@ -50,6 +50,8 @@ class IsAuthorModeratorAdminOrReadOnlyPermission(
     """
     Кастомное разрешение на доступ к информации автору, модератору, админу.
     """
+# в отличии от IsAuthenticatedOrReadOnly этот permissions еще проверяет роль
+# Проверка роли нужна
 
     def has_permission(self, request, view):
         return (request.method in permissions.SAFE_METHODS

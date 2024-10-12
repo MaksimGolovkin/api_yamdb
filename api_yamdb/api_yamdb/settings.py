@@ -14,8 +14,7 @@ ALLOWED_HOSTS = ['*']
 
 # Application definition
 
-INSTALLED_APPS = [
-    'reviews.apps.ReviewsConfig',
+INSTALLED_APPS = [   
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -26,6 +25,7 @@ INSTALLED_APPS = [
     'django_filters',
     'users.apps.UsersConfig',
     'api',
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [
