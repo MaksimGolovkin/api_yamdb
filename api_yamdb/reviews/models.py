@@ -1,67 +1,71 @@
+from datetime import date
+
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
 from django.db import models
 
+from reviews.abstracts import AbstractGenreCategoryModel
 from api.constant import MIN_SCORE, MAX_SCORE
 from users.models import User
 
-set_on_delete = 'УДАЛЕНО'
+SET_ON_DELETE = 'Удалено'
 
 
-class Category(models.Model):
+class Category(AbstractGenreCategoryModel):
     """Модель категории."""
 
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
+    class Meta:
+        verbose_name = 'Категория'
 
-    def __str__(self):
-        return self.name
-
-
-class Genre(models.Model):
+class Genre(AbstractGenreCategoryModel):
     """Модель жанра."""
 
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
-
-    def __str__(self):
-        return self.name
+    class Meta:
+        verbose_name = 'Жанр'
 
 
 class Title(models.Model):
     """Модель произведения."""
 
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    rating = models.IntegerField(
-        default=None,
+    name = models.CharField(max_length=settings.MAX_LENGTH_CHARFIELD)
+    year = models.SmallIntegerField(validators=[
+        MaxValueValidator(
+            date.today().year,
+            message='Год не может быть больше текущего'
+        )
+    ])
+    description = models.CharField(
+        max_length=settings.MAX_LENGTH_CHARFIELD,
         blank=True,
-        null=True,
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)]
+        null=True
     )
-    description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(Genre,
-                                   through='GenreTitle',
-                                   related_name='titles')
+                                   through='GenreTitle')
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET(set_on_delete),
-        related_name='titles'
+        on_delete=models.SET(SET_ON_DELETE)
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        default_related_name = 'titles'
+        ordering = ['name', '-year']
+
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.description[:20]}'
 
 
 class GenreTitle(models.Model):
     """Промежуточная модель для связи жанров с произведениями."""
 
     genre = models.ForeignKey(Genre,
-                              on_delete=models.CASCADE,
-                              related_name='genretitles')
+                              on_delete=models.CASCADE)
     title = models.ForeignKey(Title,
-                              on_delete=models.CASCADE,
-                              related_name='genretitles')
+                              on_delete=models.CASCADE)
+
+    class Meta:
+        verbose_name = 'Промежуточная модель Жанра и Произведения'
+        default_related_name = 'genretitles'
 
     def __str__(self):
         return f'{self.genre} {self.title}'

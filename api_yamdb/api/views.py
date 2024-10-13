@@ -2,14 +2,12 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, mixins, permissions,
                             status, viewsets, views, exceptions)
 from rest_framework.decorators import action, api_view
 from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
+from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (AllowAny, IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
@@ -17,7 +15,8 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.permissions import (AdminPermissions,
-                             UserPermissions, UserPermissions)
+                             UserPermissions,
+                             UserPermissions)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignupSerializer, TitleSerializer,
@@ -28,83 +27,33 @@ from reviews.models import Category, Genre, Review, Title
 NO_PUT_METHODS = ('get', 'post', 'patch', 'delete', 'head', 'options', 'trace')
 
 
-class CategoryViewSet(CreateModelMixin,
-                      ListModelMixin,
-                      DestroyModelMixin,
-                      viewsets.GenericViewSet):
+class CategoryViewSet(GenreCategoryMixin):
     """Представление для категорий."""
+
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    filter_backends = (filters.SearchFilter,)
-    pagination_class = LimitOffsetPagination
-    lookup_field = 'slug'
-    search_fields = ('name',)
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (AllowAny(),)
-
-        return (AdminPermissions(),)
 
 
-class GenreViewSet(CreateModelMixin,
-                   ListModelMixin,
-                   DestroyModelMixin,
-                   viewsets.GenericViewSet):
+class GenreViewSet(GenreCategoryMixin):
     """Представление для жанров."""
+
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    filter_backends = (filters.SearchFilter,)
-    pagination_class = LimitOffsetPagination
-    lookup_field = 'slug'
-    search_fields = ('name',)
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (AllowAny(),)
-
-        return (AdminPermissions(),)
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
 
-    queryset = Title.objects.all()
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = Title.objects.all().annotate(average_rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
-    filterset_fields = (
-        'category__slug',
-        'rating',
-        'genre__slug',
-        'name',
-        'year'
-    )
-
-    def get_queryset(self):
-        genre_slug = self.request.query_params.get('genre')
-        category_slug = self.request.query_params.get('category')
-        if genre_slug:
-            return Title.objects.filter(genre__slug=genre_slug)
-        if category_slug:
-            return Title.objects.filter(category__slug=category_slug)
-        return super().get_queryset()
+    filterset_class = TitleFilter
 
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
             return (AllowAny(),)
-
-        if self.request.method == 'PUT':
-            raise MethodNotAllowed('Данный метод запрещен.')
-
-        return (AdminPermissions(),)
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (AllowAny(),)
-
-        if self.request.method == 'PUT':
-            raise MethodNotAllowed('Данный метод запрещен.')
 
         return (AdminPermissions(),)
 
@@ -204,16 +153,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=title
         )
-        self.update_title_rating(title)
-
-    def update_title_rating(self, title):
-        # Обновляет рейтинг произведения на основе отзывов.
-        avg_rating = title.reviews.aggregate(Avg('score'))['score__avg']
-        if avg_rating is not None:
-            title.rating = round(avg_rating)
-        else:
-            title.rating = None
-        title.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):
