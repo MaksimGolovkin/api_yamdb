@@ -152,7 +152,7 @@ class TokenSerializer(serializers.ModelSerializer):
         if not default_token_generator.check_token(
                 user, confirmation_code):
             raise ValidationError(
-                {"confirmation_code": "Invalid confirmation code or user."}
+                {"Error": "Invalid confirmation code or user."}
             )
         return data
 

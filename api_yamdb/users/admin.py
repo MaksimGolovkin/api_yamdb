@@ -14,6 +14,8 @@ class UserChangeForm(UserChangeForm):
 
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
+    """Админская конфигурация для управления Пользователями."""
+
     form = UserChangeForm
     fieldsets = BaseUserAdmin.fieldsets + (
         (None, {'fields': ('bio', 'role',)}),
@@ -51,6 +53,7 @@ class TitleAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
     filter_horizontal = ('genre',)
 
+
 @admin.register(Review)
 class ReviewAdmin(admin.ModelAdmin):
     """Админская конфигурация для управления отзывами."""
@@ -66,7 +69,6 @@ class ReviewAdmin(admin.ModelAdmin):
     search_fields = ('author',)
     list_filter = ('author', 'score', 'pub_date')
     empty_value_display = '-пусто-'
-    
 
 
 @admin.register(Comment)
@@ -83,4 +85,3 @@ class CommentAdmin(admin.ModelAdmin):
     search_fields = ('author',)
     list_filter = ('author', 'pub_date')
     empty_value_display = '-пусто-'
-    
