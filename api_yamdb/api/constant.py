@@ -1,2 +1,10 @@
 MIN_SCORE = 1
 MAX_SCORE = 10
+
+ADMIN = "admin"
+MODERATOR = "moderator"
+USER = "user"
+WRONGUSERNAME = 'me'
+REGEXUSERNAME = r'^[\w.@+-]+$'
+MAX_LEN_USERNAME = 150
+MAX_LEN_EMAIL = 254

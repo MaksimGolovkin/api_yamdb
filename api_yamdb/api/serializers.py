@@ -1,8 +1,13 @@
 from datetime import date
 
-from rest_framework import serializers
+from django.contrib.auth.tokens import default_token_generator
+from django.shortcuts import get_object_or_404
+from rest_framework import serializers, status
+from rest_framework.response import Response
+
+from api.constant import WRONGUSERNAME, MAX_LEN_EMAIL, MAX_LEN_USERNAME
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
-from users.models import User
+from users.models import User, user_name_validator
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -96,7 +101,7 @@ class ReviewSerializer(serializers.ModelSerializer):
 
 class CommentSerializer(serializers.ModelSerializer):
     """Сериализатор для работы с комментариями."""
-    
+
     author = serializers.SlugRelatedField(read_only=True,
                                           slug_field='username')
 
@@ -105,20 +110,43 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
 
 
-class SignupSerializer(serializers.ModelSerializer):
+class SignupSerializer(serializers.Serializer):
     """Сериализатор для регистрации пользователя."""
 
-    class Meta:
-        model = User
-        fields = ['username', 'email']
+    username = serializers.CharField(
+        required=True,
+        max_length=MAX_LEN_USERNAME,
+        validators=[user_name_validator]
+    )
+    email = serializers.EmailField(
+        required=True,
+        max_length=MAX_LEN_EMAIL,
+    )
 
     def validate(self, data):
         username = data.get('username')
-        if username == 'me':
+        email = data.get('email')
+        if User.objects.filter(username=username, email=email):
+            return data
+        if username == WRONGUSERNAME:
             raise serializers.ValidationError(
                 "Invalid Username"
             )
+        if User.objects.filter(username=username):
+            raise serializers.ValidationError(
+                'That username is taken'
+            )
+        if User.objects.filter(email=email):
+            raise serializers.ValidationError(
+                'That email is taken'
+            )
         return data
+
+    def create(self, validated_data):
+        username = validated_data.get('username')
+        email = validated_data.get('email')
+        user, _ = User.objects.get_or_create(username=username, email=email)
+        return user
 
 
 class TokenSerializer(serializers.ModelSerializer):
@@ -130,6 +158,15 @@ class TokenSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'confirmation_code']
 
+    def validate(self, data):
+        username = data.get('username')
+        confirmation_code = data.get('email')
+        user = get_object_or_404(User, username=username)
+        if not default_token_generator.check_token(
+                user, confirmation_code):
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        return data
+
 
 class UserSerializer(serializers.ModelSerializer):
     """Сериализатор для модели User."""
@@ -140,7 +177,7 @@ class UserSerializer(serializers.ModelSerializer):
                   'last_name', 'bio', 'role']
 
     def validate_username(self, value):
-        if value == 'me':
+        if value == WRONGUSERNAME:
             raise serializers.ValidationError(
                 "Invalid Username")
         return value
