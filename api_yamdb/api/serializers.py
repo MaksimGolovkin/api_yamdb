@@ -3,7 +3,7 @@ from datetime import date
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
-from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 
 from api.constant import WRONGUSERNAME, MAX_LEN_EMAIL, MAX_LEN_USERNAME
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
@@ -143,15 +143,14 @@ class SignupSerializer(serializers.Serializer):
         return data
 
     def create(self, validated_data):
-        username = validated_data.get('username')
-        email = validated_data.get('email')
-        user, _ = User.objects.get_or_create(username=username, email=email)
+        user, _ = User.objects.get_or_create(**validated_data)
         return user
 
 
 class TokenSerializer(serializers.ModelSerializer):
     """Сериализатор для регистрации токена пользователя."""
 
+    username = serializers.CharField(required=True)
     confirmation_code = serializers.CharField(required=True)
 
     class Meta:
@@ -160,24 +159,20 @@ class TokenSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         username = data.get('username')
-        confirmation_code = data.get('email')
+        confirmation_code = data.get('confirmation_code')
         user = get_object_or_404(User, username=username)
         if not default_token_generator.check_token(
                 user, confirmation_code):
-            return Response(status=status.HTTP_400_BAD_REQUEST)
+            raise ValidationError(
+                {"confirmation_code": "Invalid confirmation code or user."}
+            )
         return data
 
 
 class UserSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели User."""
+    """Сериализатор для представления User."""
 
     class Meta:
         model = User
         fields = ['username', 'email', 'first_name',
                   'last_name', 'bio', 'role']
-
-    def validate_username(self, value):
-        if value == WRONGUSERNAME:
-            raise serializers.ValidationError(
-                "Invalid Username")
-        return value
