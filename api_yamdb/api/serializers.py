@@ -1,12 +1,13 @@
 from datetime import date
 
+
 from django.contrib.auth.tokens import default_token_generator
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from api.constant import WRONGUSERNAME, MAX_LEN_EMAIL, MAX_LEN_USERNAME
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User, user_name_validator
 
 
@@ -40,6 +41,8 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all()
     )
 
+    rating = serializers.FloatField(source='average_rating', read_only=True)
+
     class Meta:
         model = Title
         fields = (
@@ -57,20 +60,6 @@ class TitleSerializer(serializers.ModelSerializer):
         if value > year:
             raise serializers.ValidationError('Проверьте год выпуска.')
         return value
-
-    def create(self, validated_data):
-        genres_data = validated_data.pop('genre')
-        category_data = validated_data.pop('category')
-
-        title = Title.objects.create(category=category_data, **validated_data)
-
-        for genre in genres_data:
-            current_genre, status = Genre.objects.get_or_create(
-                slug=genre.slug, name=genre.name
-            )
-            GenreTitle.objects.create(genre=current_genre, title=title)
-
-        return title
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)

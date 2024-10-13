@@ -1,56 +1,66 @@
+from datetime import date
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from api.constant import MIN_SCORE, MAX_SCORE
+from reviews.abstracts import AbstractGenreCategoryModel
+from api.constant import MIN_SCORE, MAX_SCORE, MAX_LENGTH_CHARFIELD
 from users.models import User
 
-set_on_delete = 'УДАЛЕНО'
+SET_ON_DELETE = 'Удалено'
 
 
-class Category(models.Model):
+class Category(AbstractGenreCategoryModel):
     """Модель категории."""
 
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
-
-    def __str__(self):
-        return self.name
+    class Meta:
+        verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
 
 
-class Genre(models.Model):
+class Genre(AbstractGenreCategoryModel):
     """Модель жанра."""
 
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
-
-    def __str__(self):
-        return self.name
+    class Meta:
+        verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
     """Модель произведения."""
 
-    name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    rating = models.IntegerField(
-        default=None,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)]
+    name = models.CharField(max_length=MAX_LENGTH_CHARFIELD,
+                            verbose_name='Название')
+    year = models.SmallIntegerField(
+        verbose_name='Год',
+        validators=[MaxValueValidator(
+            date.today().year,
+            message='Год не может быть больше текущего'
+        )]
     )
-    description = models.CharField(max_length=256, blank=True, null=True)
+    description = models.CharField(
+        max_length=MAX_LENGTH_CHARFIELD,
+        verbose_name='Описание',
+        blank=True,
+        null=True
+    )
     genre = models.ManyToManyField(Genre,
                                    through='GenreTitle',
-                                   related_name='titles')
+                                   verbose_name='Жанр')
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET(set_on_delete),
-        related_name='titles'
+        on_delete=models.SET(SET_ON_DELETE),
+        verbose_name='Категория'
     )
 
+    class Meta:
+        verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
+        default_related_name = 'titles'
+        ordering = ['name', '-year']
+
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.description[:20]}'
 
 
 class GenreTitle(models.Model):
@@ -58,10 +68,14 @@ class GenreTitle(models.Model):
 
     genre = models.ForeignKey(Genre,
                               on_delete=models.CASCADE,
-                              related_name='genretitles')
+                              verbose_name='Жанр')
     title = models.ForeignKey(Title,
                               on_delete=models.CASCADE,
-                              related_name='genretitles')
+                              verbose_name='Произведение')
+
+    class Meta:
+        verbose_name = 'Промежуточная модель Жанра и Произведения'
+        default_related_name = 'genretitles'
 
     def __str__(self):
         return f'{self.genre} {self.title}'

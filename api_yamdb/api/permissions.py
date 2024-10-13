@@ -27,7 +27,7 @@ class ModeratorPermissions(permissions.BasePermission):
 class AdminPermissions(permissions.BasePermission):
     """Кастомное разрешение на доступ к информации только админам."""
 
-    def has_permission(self, request, view, ):
+    def has_permission(self, request, view):
         return (
             request.user.is_authenticated and (
                 request.user.role == ADMIN or request.user.is_superuser
@@ -42,4 +42,20 @@ class AuthorPermissions(permissions.BasePermission):
         return (
             request.method in permissions.SAFE_METHODS or (
                 request.user.is_authenticated and obj.author == request.user)
+        )
+
+
+class AdminOrReadOnlyPermissions(permissions.BasePermission):
+    """
+    Разрешение, позволяющее неавторизованным пользователям
+    только безопасные методы, а администратору — любые действия.
+    """
+
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+
+        return (
+            request.user.is_authenticated
+            and (request.user.role == ADMIN or request.user.is_superuser)
         )
