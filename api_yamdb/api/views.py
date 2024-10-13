@@ -188,16 +188,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             title=title
         )
-        self.update_title_rating(title)
-
-    # def update_title_rating(self, title):
-    #     """Обновляет рейтинг произведения на основе отзывов."""
-    #     avg_rating = title.reviews.aggregate(Avg('score'))['score__avg']
-    #     if avg_rating is not None:
-    #         title.rating = round(avg_rating)
-    #     else:
-    #         title.rating = None
-    #     title.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):

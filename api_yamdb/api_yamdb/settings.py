@@ -15,7 +15,6 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
-    'reviews.apps.ReviewsConfig',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -25,6 +24,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'django_filters',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
     'api',
 ]
 
@@ -131,3 +131,6 @@ SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
     "AUTH_HEADER_TYPES": ("Bearer",),
 }
+
+MAX_LENGTH_CHARFIELD = 256
+
