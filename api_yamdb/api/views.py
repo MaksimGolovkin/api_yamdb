@@ -44,7 +44,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']
-    queryset = Title.objects.all()
+    queryset = Title.objects.all().annotate(average_rating=Avg('reviews__score'))
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     pagination_class = LimitOffsetPagination
@@ -190,14 +190,14 @@ class ReviewViewSet(viewsets.ModelViewSet):
         )
         self.update_title_rating(title)
 
-    def update_title_rating(self, title):
-        """Обновляет рейтинг произведения на основе отзывов."""
-        avg_rating = title.reviews.aggregate(Avg('score'))['score__avg']
-        if avg_rating is not None:
-            title.rating = round(avg_rating)
-        else:
-            title.rating = None
-        title.save()
+    # def update_title_rating(self, title):
+    #     """Обновляет рейтинг произведения на основе отзывов."""
+    #     avg_rating = title.reviews.aggregate(Avg('score'))['score__avg']
+    #     if avg_rating is not None:
+    #         title.rating = round(avg_rating)
+    #     else:
+    #         title.rating = None
+    #     title.save()
 
 
 class CommentViewSet(viewsets.ModelViewSet):

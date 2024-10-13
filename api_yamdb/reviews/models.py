@@ -1,47 +1,39 @@
+from datetime import date
+
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+from reviews.abstracts import AbstractGenreCategoryModel
 from users.models import User
 
-set_on_delete = 'Удалено'
+SET_ON_DELETE = 'Удалено'
 
 
-class Category(models.Model):
+class Category(AbstractGenreCategoryModel):
     """Модель категории."""
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
-
-    def __str__(self):
-        return self.name
 
 
-class Genre(models.Model):
+class Genre(AbstractGenreCategoryModel):
     """Модель жанра."""
-    name = models.CharField(max_length=256)
-    slug = models.SlugField(unique=True, max_length=50)
-
-    def __str__(self):
-        return self.name
 
 
 class Title(models.Model):
     """Модель произведения."""
+
     name = models.CharField(max_length=256)
-    year = models.IntegerField()
-    rating = models.IntegerField(
-        default=None,
-        blank=True,
-        null=True,
-        validators=[MinValueValidator(1),
-                    MaxValueValidator(10)]
-    )
+    year = models.DateField(validators=[
+        MaxValueValidator(
+            date.today().year,
+            message='Год не может быть больше текущего'
+        )
+    ])
     description = models.CharField(max_length=256, blank=True, null=True)
     genre = models.ManyToManyField(Genre,
                                    through='GenreTitle',
                                    related_name='titles')
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET(set_on_delete),
+        on_delete=models.SET(SET_ON_DELETE),
         related_name='titles'
     )
 
@@ -51,6 +43,7 @@ class Title(models.Model):
 
 class GenreTitle(models.Model):
     """Промежуточная модель для связи жанров с произведениями."""
+
     genre = models.ForeignKey(Genre,
                               on_delete=models.CASCADE,
                               related_name='genretitles')
@@ -64,6 +57,7 @@ class GenreTitle(models.Model):
 
 class Review(models.Model):
     """Класс для работы с отзывами."""
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
@@ -95,6 +89,7 @@ class Review(models.Model):
 
 class Comment(models.Model):
     """Класс для работы с комметариями."""
+
     review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name="comments"
     )
