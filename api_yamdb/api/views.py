@@ -3,24 +3,24 @@ from django.core.mail import send_mail
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, mixins, permissions,
-                            status, viewsets, views, exceptions)
+from rest_framework import (filters, status, viewsets, exceptions)
 from rest_framework.decorators import action, api_view
-from rest_framework.exceptions import MethodNotAllowed
-from rest_framework.mixins import CreateModelMixin, DestroyModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
+from rest_framework.permissions import (IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
 from api.permissions import (AdminPermissions,
                              UserPermissions,
-                             UserPermissions)
+                             UserPermissions,
+                             AdminOrReadOnlyPermissions)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignupSerializer, TitleSerializer,
                              TokenSerializer, UserSerializer)
+from api.filters import TitleFilter
+from api.mixins import GenreCategoryMixin
 from users.models import User
 from reviews.models import Category, Genre, Review, Title
 
@@ -45,17 +45,14 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']
-    queryset = Title.objects.all().annotate(average_rating=Avg('reviews__score'))
+    queryset = Title.objects.all().annotate(
+        average_rating=Avg('reviews__score')
+    )
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
+    permission_classes = (AdminOrReadOnlyPermissions,)
     pagination_class = LimitOffsetPagination
     filterset_class = TitleFilter
-
-    def get_permissions(self):
-        if self.request.method in permissions.SAFE_METHODS:
-            return (AllowAny(),)
-
-        return (AdminPermissions(),)
 
 
 @api_view(['POST'])

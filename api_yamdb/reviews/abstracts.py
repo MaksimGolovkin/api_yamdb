@@ -1,11 +1,15 @@
-from django.conf import settings
 from django.db import models
+
+from api.constant import MAX_LENGTH_CHARFIELD
+
 
 class AbstractGenreCategoryModel(models.Model):
     """Абстрактная модель для Genre и Category."""
 
-    name = models.CharField(max_length=settings.MAX_LENGTH_CHARFIELD)
-    slug = models.SlugField(unique=True)
+    name = models.CharField(max_length=MAX_LENGTH_CHARFIELD,
+                            verbose_name='Название')
+    slug = models.SlugField(unique=True,
+                            verbose_name='Слаг')
 
     class Meta:
         ordering = ['name']

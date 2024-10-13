@@ -7,7 +7,7 @@ from rest_framework import serializers, status
 from rest_framework.response import Response
 
 from api.constant import WRONGUSERNAME, MAX_LEN_EMAIL, MAX_LEN_USERNAME
-from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
+from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User, user_name_validator
 
 

@@ -1,11 +1,10 @@
 from datetime import date
 
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.conf import settings
 from django.db import models
 
 from reviews.abstracts import AbstractGenreCategoryModel
-from api.constant import MIN_SCORE, MAX_SCORE
+from api.constant import MIN_SCORE, MAX_SCORE, MAX_LENGTH_CHARFIELD
 from users.models import User
 
 SET_ON_DELETE = 'Удалено'
@@ -16,38 +15,47 @@ class Category(AbstractGenreCategoryModel):
 
     class Meta:
         verbose_name = 'Категория'
+        verbose_name_plural = 'Категории'
+
 
 class Genre(AbstractGenreCategoryModel):
     """Модель жанра."""
 
     class Meta:
         verbose_name = 'Жанр'
+        verbose_name_plural = 'Жанры'
 
 
 class Title(models.Model):
     """Модель произведения."""
 
-    name = models.CharField(max_length=settings.MAX_LENGTH_CHARFIELD)
-    year = models.SmallIntegerField(validators=[
-        MaxValueValidator(
+    name = models.CharField(max_length=MAX_LENGTH_CHARFIELD,
+                            verbose_name='Название')
+    year = models.SmallIntegerField(
+        verbose_name='Год',
+        validators=[MaxValueValidator(
             date.today().year,
             message='Год не может быть больше текущего'
-        )
-    ])
+        )]
+    )
     description = models.CharField(
-        max_length=settings.MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LENGTH_CHARFIELD,
+        verbose_name='Описание',
         blank=True,
         null=True
     )
     genre = models.ManyToManyField(Genre,
-                                   through='GenreTitle')
+                                   through='GenreTitle',
+                                   verbose_name='Жанр')
     category = models.ForeignKey(
         Category,
-        on_delete=models.SET(SET_ON_DELETE)
+        on_delete=models.SET(SET_ON_DELETE),
+        verbose_name='Категория'
     )
 
     class Meta:
         verbose_name = 'Произведение'
+        verbose_name_plural = 'Произведения'
         default_related_name = 'titles'
         ordering = ['name', '-year']
 
@@ -59,9 +67,11 @@ class GenreTitle(models.Model):
     """Промежуточная модель для связи жанров с произведениями."""
 
     genre = models.ForeignKey(Genre,
-                              on_delete=models.CASCADE)
+                              on_delete=models.CASCADE,
+                              verbose_name='Жанр')
     title = models.ForeignKey(Title,
-                              on_delete=models.CASCADE)
+                              on_delete=models.CASCADE,
+                              verbose_name='Произведение')
 
     class Meta:
         verbose_name = 'Промежуточная модель Жанра и Произведения'
