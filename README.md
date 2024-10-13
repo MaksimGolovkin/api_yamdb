@@ -104,10 +104,17 @@ _"Admin"_
   "count": 0,
   "next": "string",
   "previous": "string",
-  "results": [...]
+  "results": [
+    {
+      "id": 0,
+      "text": "string",
+      "author": "string",
+      "score": 1,
+      "pub_date": "2019-08-24T14:15:22Z"
+    }
+  ]
    }  
  ```
-
 #### GET ...api/v1/titles/{title_id}/reviews/{review_id}/comments/
 Получение списка всех комментариев:
 ```
@@ -115,7 +122,14 @@ _"Admin"_
   "count": 0,
   "next": "string",
   "previous": "string",
-  "results": [...]
+  "results": [
+    {
+      "id": 0,
+      "text": "string",
+      "author": "string",
+      "pub_date": "2019-08-24T14:15:22Z"
+    }
+  ]
   }
 ```
 ...
@@ -125,13 +139,21 @@ _"Admin"_
 1.  Клонировать проект с GitHub.com примени следующую команду в терминале: <br>`git clone git@github.com:MaksimGolovkin/api_yamdb.git`
 
 2. Настроить виртуальное окружение в Вашей IDE.
+    <br>`python -m venv venv`
+    <br>`source venv/Scripts/activate`
 
-3. Установить зависимости из файла 'requirements.txt' с помощью команды: <br>`pip install --r requirements.txt`
+3. Установить зависимости из файла 'requirements.txt' с помощью команды: <br>`pip install -r requirements.txt`
 
-4. Запустить проект из папки проекта, с помощью команды:
+4. Создайте миграции в проекте из папки (где находится файл 'manage.py') проекта, с помощью команды:
+    <br>`python manage.py makemigrations`
+
+5. Примените миграции в проекте из папки (где находится файл 'manage.py') проекта, с помощью команды:
+    <br>`python manage.py migrate`
+
+6. Запустить проект из папки (где находится файл 'manage.py') проекта, с помощью команды:
     <br>`python manage.py runserver`
 
-5. Перейти по ссылке в любом из имеющихся браузеров, добавив вместо "(...)" любой из имеющихся роутов: 
+7. Перейти по ссылке в любом из имеющихся браузеров, добавив вместо "(...)" любой из имеющихся роутов: 
     <br>`http://127.0.0.1:8000/(...)`
 
 ### _Дополнительная информацию по работе проекта, содержится по адерсу:_

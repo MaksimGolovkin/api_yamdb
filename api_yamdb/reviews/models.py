@@ -5,6 +5,7 @@ from django.conf import settings
 from django.db import models
 
 from reviews.abstracts import AbstractGenreCategoryModel
+from api.constant import MIN_SCORE, MAX_SCORE
 from users.models import User
 
 SET_ON_DELETE = 'Удалено'
@@ -70,52 +71,73 @@ class GenreTitle(models.Model):
         return f'{self.genre} {self.title}'
 
 
-class Review(models.Model):
+class BaseModelReviw(models.Model):
+    """Абстрактная модель для добавления текста и даты публикации."""
+
+    text = models.TextField('Текст')
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Review(BaseModelReviw):
     """Класс для работы с отзывами."""
 
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name="reviews",
+        related_name='reviews',
+        verbose_name='Произведение',
     )
-    text = models.TextField("Текст")
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="reviews",
-        verbose_name="Автор",
+        related_name='reviews',
+        verbose_name='Автор',
     )
-    score = models.PositiveSmallIntegerField(
-        'Оценка',
-        validators=[MinValueValidator(1, message='Минимальное значение 1'),
-                    MaxValueValidator(10, message='Максимальное значение 10')
-                    ]
+    score = models.IntegerField(
+        verbose_name='Оценка',
+        help_text='Ваша оценка от 1 до 10',
+        validators=[MinValueValidator(
+                    MIN_SCORE, message=f'Минимальное значение {MIN_SCORE}'),
+                    MaxValueValidator(
+                    MAX_SCORE, message=f'Максимальное значение {MAX_SCORE}')]
     )
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
-        ordering = ["-pub_date"]
-        constraints = [
+        verbose_name = 'Отзыв'
+        verbose_name_plural = 'Отзывы'
+        constraints = (
             models.UniqueConstraint(
-                fields=["author", "title"], name="unique_review"
-            )
-        ]
+                fields=['title', 'author'],
+                name='reviews_unique',
+            ),
+        )
+
+    def __str__(self):
+        return self.text
 
 
-class Comment(models.Model):
+class Comment(BaseModelReviw):
     """Класс для работы с комметариями."""
 
     review = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name="comments"
+        Review,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Отзыв',
     )
-    text = models.TextField("Текст")
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name="comments"
+        User,
+        on_delete=models.CASCADE,
+        related_name='comments',
+        verbose_name='Автор',
     )
-    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     class Meta:
-        ordering = ["-pub_date"]
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
         return self.text
