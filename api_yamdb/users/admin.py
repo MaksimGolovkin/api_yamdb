@@ -4,15 +4,11 @@ from django.contrib.auth.forms import UserChangeForm
 
 from reviews.models import Category, Genre, Title, Review, Comment
 from users.admin_mixins import GenreCategoryMixin
+from users.forms import UserChangeForm
 from users.models import User
 
 
 admin.site.empty_value_display = "-пусто-"
-
-
-class UserChangeForm(UserChangeForm):
-    class Meta(UserChangeForm.Meta):
-        model = User
 
 
 @admin.register(User)
@@ -62,8 +58,6 @@ class TitleAdmin(admin.ModelAdmin):
 
     def get_genres(self, obj):
         return ', '.join(genre.name for genre in obj.genre.all())
-
-    get_genres.short_description = 'Жанры'
 
 
 @admin.register(Review)

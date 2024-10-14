@@ -2,7 +2,7 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import (filters, status, viewsets, exceptions)
+from rest_framework import (filters, status, viewsets)
 from rest_framework.decorators import action, api_view
 from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import (IsAuthenticated,
@@ -10,6 +10,9 @@ from rest_framework.permissions import (IsAuthenticated,
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import AccessToken
 
+from api.constant import NO_PUT_METHODS
+from api.filters import TitleFilter
+from api.mixins import GenreCategoryMixin
 from api.permissions import (AdminPermissions,
                              UserPermissions,
                              AdminOrReadOnlyPermissions)
@@ -17,12 +20,8 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              SignupSerializer, TitleSerializer,
                              TokenSerializer, UserSerializer)
-from api.filters import TitleFilter
-from api.mixins import GenreCategoryMixin
-from users.models import User
 from reviews.models import Category, Genre, Review, Title
-
-NO_PUT_METHODS = ('get', 'post', 'patch', 'delete', 'head', 'options', 'trace')
+from users.models import User
 
 
 class CategoryViewSet(GenreCategoryMixin):
@@ -91,19 +90,8 @@ class UsersViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     filter_backends = (filters.SearchFilter,)
     search_fields = ('username',)
+    http_method_names = NO_PUT_METHODS
     permission_classes = (IsAuthenticated, AdminPermissions,)
-
-    def update(self, request, *args, **kwargs):
-        # Исключение метода "PUT".
-        raise exceptions.MethodNotAllowed('PUT')
-
-    def partial_update(self, request, username):
-        # Переопределение метода "PATCH".
-        user = get_object_or_404(User, username=username)
-        result = self.get_serializer(user, data=request.data, partial=True)
-        result.is_valid(raise_exception=True)
-        result.save()
-        return Response(result.data)
 
     @ action(
         methods=['get', 'patch'],

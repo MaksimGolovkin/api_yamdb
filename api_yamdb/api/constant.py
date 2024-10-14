@@ -1,7 +1,8 @@
 MIN_SCORE = 1
 MAX_SCORE = 10
 DEFAULT_SCORE = None
-
+NO_PUT_METHODS = ('get', 'post', 'patch', 'delete')
+SET_ON_DELETE = 'Удалено'
 ADMIN = "admin"
 MODERATOR = "moderator"
 USER = "user"
