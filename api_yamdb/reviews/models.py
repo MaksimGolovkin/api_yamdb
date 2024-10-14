@@ -98,7 +98,7 @@ class TextPublicationAuthorModel(models.Model):
         verbose_name='Автор',
     )
 
-    class Meta:
+    class Meta():
         abstract = True
         ordering = ['-pub_date']
 
@@ -112,7 +112,6 @@ class Review(TextPublicationAuthorModel):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews',
         verbose_name='Произведение',
     )
     score = models.IntegerField(
@@ -124,7 +123,7 @@ class Review(TextPublicationAuthorModel):
                     MAX_SCORE, message=f'Максимальное значение {MAX_SCORE}')]
     )
 
-    class Meta:
+    class Meta(TextPublicationAuthorModel.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = (
@@ -142,11 +141,10 @@ class Comment(TextPublicationAuthorModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
         verbose_name='Отзыв',
     )
 
-    class Meta:
+    class Meta(TextPublicationAuthorModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'
