@@ -1,10 +1,14 @@
 from datetime import date
 
+from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 from reviews.abstracts import AbstractGenreCategoryModel
-from api.constant import MIN_SCORE, MAX_SCORE, MAX_LENGTH_CHARFIELD
+from api.constant import (MAX_SCORE,
+                          MAX_LEN_CHARFIELD,
+                          MAX_LEN_OUT,
+                          MIN_SCORE)
 from users.models import User
 
 SET_ON_DELETE = 'Удалено'
@@ -13,7 +17,7 @@ SET_ON_DELETE = 'Удалено'
 class Category(AbstractGenreCategoryModel):
     """Модель категории."""
 
-    class Meta:
+    class Meta(AbstractGenreCategoryModel.Meta):
         verbose_name = 'Категория'
         verbose_name_plural = 'Категории'
 
@@ -21,25 +25,28 @@ class Category(AbstractGenreCategoryModel):
 class Genre(AbstractGenreCategoryModel):
     """Модель жанра."""
 
-    class Meta:
+    class Meta(AbstractGenreCategoryModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
+
+
+def validate_year(value):
+    """Валидатор для проверки, что год не превышает текущий."""
+    if value > date.today().year:
+        raise ValidationError('Год не может быть больше текущего года.')
 
 
 class Title(models.Model):
     """Модель произведения."""
 
-    name = models.CharField(max_length=MAX_LENGTH_CHARFIELD,
+    name = models.CharField(max_length=MAX_LEN_CHARFIELD,
                             verbose_name='Название')
     year = models.SmallIntegerField(
         verbose_name='Год',
-        validators=[MaxValueValidator(
-            date.today().year,
-            message='Год не может быть больше текущего'
-        )]
+        validators=[validate_year]
     )
     description = models.CharField(
-        max_length=MAX_LENGTH_CHARFIELD,
+        max_length=MAX_LEN_CHARFIELD,
         verbose_name='Описание',
         blank=True,
         null=True
@@ -60,7 +67,7 @@ class Title(models.Model):
         ordering = ['name', '-year']
 
     def __str__(self):
-        return f'{self.name} {self.description[:20]}'
+        return f'{self.name} {self.description[:MAX_LEN_OUT]}'
 
 
 class GenreTitle(models.Model):
@@ -95,7 +102,7 @@ class TextPublicationAuthorModel(models.Model):
     class Meta:
         abstract = True
         ordering = ['-pub_date']
-    
+
     def __str__(self):
         return self.text
 
@@ -128,6 +135,7 @@ class Review(TextPublicationAuthorModel):
             ),
         )
         default_related_name = 'reviews'
+
 
 class Comment(TextPublicationAuthorModel):
     """Класс для работы с комментариями."""

@@ -1,6 +1,5 @@
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import (filters, status, viewsets, exceptions)
@@ -44,9 +43,9 @@ class TitleViewSet(viewsets.ModelViewSet):
     """Представление для произведений."""
 
     http_method_names = ['get', 'post', 'patch', 'delete']
-    queryset = Title.objects.all().annotate(
-        average_rating=Avg('reviews__score')
-    )
+    queryset = Title.objects.all()
+    # Не очень понял про сортировку после добавления нового поля,
+    # у меня есть фильтерсет, полагаю, что я что-то не понимаю.
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (AdminOrReadOnlyPermissions,)
@@ -177,5 +176,5 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         """Создает комментарий для текузего отзыва."""
-        
+
         serializer.save(author=self.request.user, review=self.get_review())

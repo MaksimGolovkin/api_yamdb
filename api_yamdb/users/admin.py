@@ -7,6 +7,9 @@ from users.admin_mixins import GenreCategoryMixin
 from users.models import User
 
 
+admin.site.empty_value_display = "-пусто-"
+
+
 class UserChangeForm(UserChangeForm):
     class Meta(UserChangeForm.Meta):
         model = User
@@ -30,7 +33,6 @@ class UserAdmin(BaseUserAdmin):
     search_fields = ('username',)
     list_filter = ('role',)
     list_editable = ('role',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Category)
@@ -47,11 +49,21 @@ class GenreAdmin(GenreCategoryMixin):
 class TitleAdmin(admin.ModelAdmin):
     """Админская конфигурация для управления произведениями."""
 
-    list_display = ('id', 'name', 'year', 'category', 'description')
+    list_display = ('id',
+                    'name',
+                    'year',
+                    'category',
+                    'get_genres',
+                    'description')
+    list_editable = ('category',)
     search_fields = ('name', 'year')
     list_filter = ('year', 'category', 'genre')
-    empty_value_display = '-пусто-'
     filter_horizontal = ('genre',)
+
+    def get_genres(self, obj):
+        return ', '.join(genre.name for genre in obj.genre.all())
+
+    get_genres.short_description = 'Жанры'
 
 
 @admin.register(Review)
@@ -68,7 +80,6 @@ class ReviewAdmin(admin.ModelAdmin):
     )
     search_fields = ('author',)
     list_filter = ('author', 'score', 'pub_date')
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Comment)
@@ -84,4 +95,3 @@ class CommentAdmin(admin.ModelAdmin):
     )
     search_fields = ('author',)
     list_filter = ('author', 'pub_date')
-    empty_value_display = '-пусто-'

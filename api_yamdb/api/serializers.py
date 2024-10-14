@@ -1,11 +1,15 @@
 from datetime import date
 
 from django.contrib.auth.tokens import default_token_generator
+from django.db.models import Avg
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
 
-from api.constant import WRONGUSERNAME, MAX_LEN_EMAIL, MAX_LEN_USERNAME
+from api.constant import (DEFAULT_SCORE,
+                          MAX_LEN_EMAIL,
+                          MAX_LEN_USERNAME,
+                          WRONGUSERNAME)
 from reviews.models import Category, Comment, Genre, Review, Title
 from users.models import User, user_name_validator
 
@@ -40,7 +44,9 @@ class TitleSerializer(serializers.ModelSerializer):
         queryset=Category.objects.all()
     )
 
-    rating = serializers.FloatField(source='average_rating', read_only=True)
+    rating = serializers.IntegerField(default=DEFAULT_SCORE, read_only=True)
+
+    year = serializers.IntegerField()
 
     class Meta:
         model = Title
@@ -62,6 +68,8 @@ class TitleSerializer(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
+        average_rating = instance.reviews.aggregate(Avg('score'))['score__avg']
+        ret['rating'] = average_rating
         ret['genre'] = GenreSerializer(instance.genre.all(), many=True).data
         ret['category'] = CategorySerializer(instance.category).data
         return ret
