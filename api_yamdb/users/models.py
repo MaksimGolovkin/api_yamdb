@@ -5,7 +5,7 @@ from api.constant import (
     USER, ADMIN, MODERATOR, WRONGUSERNAME,
     MAX_LEN_USERNAME, MAX_LEN_EMAIL
 )
-from api_yamdb.users.validators import user_name_validator
+from users.validators import user_name_validator
 
 
 ROLE_CHOICES = (
