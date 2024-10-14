@@ -1,14 +1,12 @@
-from datetime import date
-
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.abstracts import AbstractGenreCategoryModel
 from api.constant import (MAX_SCORE,
                           MAX_LEN_CHARFIELD,
                           MAX_LEN_OUT,
                           MIN_SCORE)
+from reviews.abstracts import AbstractGenreCategoryModel
+from reviews.validators import validate_year
 from users.models import User
 
 SET_ON_DELETE = 'Удалено'
@@ -28,12 +26,6 @@ class Genre(AbstractGenreCategoryModel):
     class Meta(AbstractGenreCategoryModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-
-
-def validate_year(value):
-    """Валидатор для проверки, что год не превышает текущий."""
-    if value > date.today().year:
-        raise ValidationError('Год не может быть больше текущего года.')
 
 
 class Title(models.Model):
