@@ -43,8 +43,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = Title.objects.all()
-    # Не очень понял про сортировку после добавления нового поля,
-    # у меня есть фильтерсет, полагаю, что я что-то не понимаю.
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (AdminOrReadOnlyPermissions,)
