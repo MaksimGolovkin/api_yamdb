@@ -1,6 +1,3 @@
-from datetime import date
-
-from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
@@ -10,6 +7,7 @@ from api.constant import (MAX_SCORE,
                           MIN_SCORE,
                           SET_ON_DELETE)
 from reviews.abstracts import AbstractGenreCategoryModel
+from reviews.validate import validate_year
 from users.models import User
 
 
@@ -27,12 +25,6 @@ class Genre(AbstractGenreCategoryModel):
     class Meta(AbstractGenreCategoryModel.Meta):
         verbose_name = 'Жанр'
         verbose_name_plural = 'Жанры'
-
-
-def validate_year(value):
-    """Валидатор для проверки, что год не превышает текущий."""
-    if value > date.today().year:
-        raise ValidationError('Год не может быть больше текущего года.')
 
 
 class Title(models.Model):
@@ -112,7 +104,6 @@ class Review(TextPublicationAuthorModel):
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews',
         verbose_name='Произведение',
     )
     score = models.IntegerField(
@@ -124,7 +115,7 @@ class Review(TextPublicationAuthorModel):
                     MAX_SCORE, message=f'Максимальное значение {MAX_SCORE}')]
     )
 
-    class Meta:
+    class Meta(TextPublicationAuthorModel.Meta):
         verbose_name = 'Отзыв'
         verbose_name_plural = 'Отзывы'
         constraints = (
@@ -142,11 +133,10 @@ class Comment(TextPublicationAuthorModel):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name='comments',
         verbose_name='Отзыв',
     )
 
-    class Meta:
+    class Meta(TextPublicationAuthorModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
         default_related_name = 'comments'

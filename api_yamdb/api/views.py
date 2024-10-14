@@ -43,8 +43,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = Title.objects.all()
-    # Не очень понял про сортировку после добавления нового поля,
-    # у меня есть фильтерсет, полагаю, что я что-то не понимаю.
     serializer_class = TitleSerializer
     filter_backends = (DjangoFilterBackend,)
     permission_classes = (AdminOrReadOnlyPermissions,)
@@ -55,7 +53,6 @@ class TitleViewSet(viewsets.ModelViewSet):
 @api_view(['POST'])
 def signup(request):
     """Функция для регистрации пользователя."""
-
     serializer = SignupSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user = serializer.save()
@@ -73,7 +70,6 @@ def signup(request):
 @api_view(['POST'])
 def token(request):
     """Функция для регистрации токена."""
-
     serializer = TokenSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     username = serializer.data.get("username")
@@ -124,18 +120,15 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def get_title(self):
         """Отображает объект текущего произведения."""
-
         title_id = self.kwargs.get('title_id')
         return get_object_or_404(Title, pk=title_id)
 
     def get_queryset(self):
         """Отображение всех отзывов по произведению."""
-
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
         """Создает отзыв для текущего произведения и обновляет рейтинг."""
-
         title = self.get_title()
         serializer.save(
             author=self.request.user,
@@ -159,10 +152,8 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """ Отображение всех комментариев по отзыву."""
-
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
         """Создает комментарий для текузего отзыва."""
-
         serializer.save(author=self.request.user, review=self.get_review())

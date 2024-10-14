@@ -1,22 +1,17 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
 from django.db import models
+
 from api.constant import (
-    USER, ADMIN, MODERATOR, REGEXUSERNAME, WRONGUSERNAME,
+    USER, ADMIN, MODERATOR, WRONGUSERNAME,
     MAX_LEN_USERNAME, MAX_LEN_EMAIL
 )
+from users.validate import user_name_validator
 
 
 ROLE_CHOICES = (
     (USER, "Пользователь"),
     (MODERATOR, "Модератор"),
     (ADMIN, "Администратор"),
-)
-
-# Проверка на корректность ввода.
-user_name_validator = RegexValidator(
-    regex=REGEXUSERNAME,
-    message='Username contains invalid characters'
 )
 
 
