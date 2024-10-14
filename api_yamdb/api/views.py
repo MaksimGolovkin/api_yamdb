@@ -13,7 +13,6 @@ from rest_framework_simplejwt.tokens import AccessToken
 
 from api.permissions import (AdminPermissions,
                              UserPermissions,
-                             UserPermissions,
                              AdminOrReadOnlyPermissions)
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
@@ -98,16 +97,18 @@ class UsersViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticated, AdminPermissions,)
 
     def update(self, request, *args, **kwargs):
+        # Исключение метода "PUT".
         raise exceptions.MethodNotAllowed('PUT')
 
     def partial_update(self, request, username):
+        # Переопределение метода "PATCH".
         user = get_object_or_404(User, username=username)
         result = self.get_serializer(user, data=request.data, partial=True)
         result.is_valid(raise_exception=True)
         result.save()
         return Response(result.data)
 
-    @action(
+    @ action(
         methods=['get', 'patch'],
         detail=False,
         url_path='me',
@@ -135,16 +136,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def get_title(self):
-        # Отображает объект текущего произведения.
+        """Отображает объект текущего произведения."""
+
         title_id = self.kwargs.get('title_id')
         return get_object_or_404(Title, pk=title_id)
 
     def get_queryset(self):
-        # Отображение всех отзывов по произведению.
+        """Отображение всех отзывов по произведению."""
+
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        # Создает отзыв для текущего произведения и обновляет рейтинг.
+        """Создает отзыв для текущего произведения и обновляет рейтинг."""
+
         title = self.get_title()
         serializer.save(
             author=self.request.user,
@@ -167,9 +171,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                                  pk=self.kwargs['review_id'])
 
     def get_queryset(self):
-        # Отображение всех комментариев по отзыву.
+        """ Отображение всех комментариев по отзыву."""
+
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        # Создает комментарий для текузего отзыва.
+        """Создает комментарий для текузего отзыва."""
+        
         serializer.save(author=self.request.user, review=self.get_review())

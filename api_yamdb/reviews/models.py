@@ -81,17 +81,26 @@ class GenreTitle(models.Model):
         return f'{self.genre} {self.title}'
 
 
-class BaseModelReviw(models.Model):
-    """Абстрактная модель для добавления текста и даты публикации."""
+class TextPublicationAuthorModel(models.Model):
+    """Абстрактная модель для добавления текста, автора и даты публикации."""
 
     text = models.TextField('Текст')
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор',
+    )
 
     class Meta:
         abstract = True
+        ordering = ['-pub_date']
+    
+    def __str__(self):
+        return self.text
 
 
-class Review(BaseModelReviw):
+class Review(TextPublicationAuthorModel):
     """Класс для работы с отзывами."""
 
     title = models.ForeignKey(
@@ -100,15 +109,9 @@ class Review(BaseModelReviw):
         related_name='reviews',
         verbose_name='Произведение',
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор',
-    )
     score = models.IntegerField(
         verbose_name='Оценка',
-        help_text='Ваша оценка от 1 до 10',
+        help_text=f'Ваша оценка от {MIN_SCORE} до {MAX_SCORE}',
         validators=[MinValueValidator(
                     MIN_SCORE, message=f'Минимальное значение {MIN_SCORE}'),
                     MaxValueValidator(
@@ -124,13 +127,10 @@ class Review(BaseModelReviw):
                 name='reviews_unique',
             ),
         )
+        default_related_name = 'reviews'
 
-    def __str__(self):
-        return self.text
-
-
-class Comment(BaseModelReviw):
-    """Класс для работы с комметариями."""
+class Comment(TextPublicationAuthorModel):
+    """Класс для работы с комментариями."""
 
     review = models.ForeignKey(
         Review,
@@ -138,16 +138,8 @@ class Comment(BaseModelReviw):
         related_name='comments',
         verbose_name='Отзыв',
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='comments',
-        verbose_name='Автор',
-    )
 
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
-
-    def __str__(self):
-        return self.text
+        default_related_name = 'comments'

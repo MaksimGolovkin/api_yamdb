@@ -5,7 +5,6 @@ from api.views import (CategoryViewSet, CommentViewSet, GenreViewSet,
                        ReviewViewSet, TitleViewSet,
                        UsersViewSet, signup, token)
 
-
 app_name = 'api'
 
 v1_router = DefaultRouter()
