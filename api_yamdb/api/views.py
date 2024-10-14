@@ -136,16 +136,19 @@ class ReviewViewSet(viewsets.ModelViewSet):
     pagination_class = LimitOffsetPagination
 
     def get_title(self):
-        # Отображает объект текущего произведения.
+        """Отображает объект текущего произведения."""
+
         title_id = self.kwargs.get('title_id')
         return get_object_or_404(Title, pk=title_id)
 
     def get_queryset(self):
-        # Отображение всех отзывов по произведению.
+        """Отображение всех отзывов по произведению."""
+
         return self.get_title().reviews.all()
 
     def perform_create(self, serializer):
-        # Создает отзыв для текущего произведения и обновляет рейтинг.
+        """Создает отзыв для текущего произведения и обновляет рейтинг."""
+
         title = self.get_title()
         serializer.save(
             author=self.request.user,
@@ -168,9 +171,11 @@ class CommentViewSet(viewsets.ModelViewSet):
                                  pk=self.kwargs['review_id'])
 
     def get_queryset(self):
-        # Отображение всех комментариев по отзыву.
+        """ Отображение всех комментариев по отзыву."""
+
         return self.get_review().comments.all()
 
     def perform_create(self, serializer):
-        # Создает комментарий для текузего отзыва.
+        """Создает комментарий для текузего отзыва."""
+        
         serializer.save(author=self.request.user, review=self.get_review())
