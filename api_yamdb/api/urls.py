@@ -18,8 +18,12 @@ v1_router.register(
     r'titles/(?P<title_id>[^/.]+)/reviews/(?P<review_id>[^/.]+)/comments',
     CommentViewSet,
     basename='comments')
+V1_Urls = [
+    path('', include(v1_router.urls)),
+    path('auth/signup/', signup, name='users_signup'),
+    path('auth/token/', token, name='take_token_users'),
+]
+
 urlpatterns = [
-    path('v1/', include(v1_router.urls)),
-    path('v1/auth/signup/', signup, name='users_signup'),
-    path('v1/auth/token/', token, name='take_token_users'),
+    path('v1/', include(V1_Urls)),
 ]

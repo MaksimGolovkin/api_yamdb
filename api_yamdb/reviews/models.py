@@ -4,14 +4,13 @@ from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
-from reviews.abstracts import AbstractGenreCategoryModel
 from api.constant import (MAX_SCORE,
                           MAX_LEN_CHARFIELD,
                           MAX_LEN_OUT,
-                          MIN_SCORE)
+                          MIN_SCORE,
+                          SET_ON_DELETE)
+from reviews.abstracts import AbstractGenreCategoryModel
 from users.models import User
-
-SET_ON_DELETE = 'Удалено'
 
 
 class Category(AbstractGenreCategoryModel):
