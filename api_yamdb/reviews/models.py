@@ -7,7 +7,7 @@ from api.constant import (MAX_SCORE,
                           MIN_SCORE,
                           SET_ON_DELETE)
 from reviews.abstracts import AbstractGenreCategoryModel
-from reviews.validate import validate_year
+from reviews.validators import validate_year
 from users.models import User
 
 
@@ -90,7 +90,7 @@ class TextPublicationAuthorModel(models.Model):
         verbose_name='Автор',
     )
 
-    class Meta:
+    class Meta():
         abstract = True
         ordering = ['-pub_date']
 
